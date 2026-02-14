@@ -12,7 +12,7 @@
             --dark-pink: #d63384;
             --glass: rgba(255, 255, 255, 0.7);
             --maze-wall: #4a7c44; 
-            --maze-path: transparent; /* Removed the cream color */
+            --maze-path: transparent;
         }
 
         body {
@@ -23,7 +23,6 @@
             min-height: 100vh; text-align: center; overflow: hidden;
         }
 
-        /* Floating Background Hearts */
         .bg-heart {
             position: fixed; color: rgba(255, 255, 255, 0.5);
             font-size: 20px; user-select: none; pointer-events: none;
@@ -40,11 +39,11 @@
             border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1);
             animation: fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative; border: 2px solid white;
+            max-height: 90vh; overflow-y: auto; /* Added for mobile safety */
         }
 
         .active { display: block; }
 
-        /* Buttons */
         .btn { 
             padding: 12px 25px; border-radius: 50px; border: none; 
             background: var(--red); color: white; font-weight: bold; 
@@ -57,12 +56,11 @@
 
         #no-btn { position: absolute; background: #eee; color: #666; transition: 0.2s cubic-bezier(0.19, 1, 0.22, 1); }
 
-        /* Maze Styles */
         #maze-container {
             display: grid; grid-template-columns: repeat(10, 1fr);
             width: 300px; height: 300px; margin: 0 auto;
             border: 8px solid white; border-radius: 20px; 
-            background: #a2d149; /* Bright grass green */
+            background: #a2d149;
             overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
         }
         .cell { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
@@ -74,15 +72,18 @@
             border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             z-index: 10;
         }
-        .end-point { font-size: 20px; animation: beat 1s infinite; }
 
         .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 160px; margin: 20px auto 0; }
-        .ctrl-btn { background: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; color: var(--dark-pink); box-shadow: 0 4px 0 #ddd; }
-        .ctrl-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #ddd; }
+        .ctrl-btn { background: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; color: var(--dark-pink); }
 
-        /* Final Photo Grid */
+        /* PHOTO QUALITY OPTIMIZATION */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; border: 3px solid white; }
+        .grid img { 
+            width: 100%; aspect-ratio: 1; object-fit: cover; 
+            border-radius: 12px; border: 3px solid white;
+            image-rendering: -webkit-optimize-contrast; /* Keeps them sharp but helps rendering speed */
+            will-change: transform; /* Helps mobile browsers handle high-res images */
+        }
 
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
         
@@ -146,16 +147,15 @@
         <h1 style="margin-bottom:0">I Love You, Fatima! 💖</h1>
         <p>Forever & Always Yours - Sagar</p>
         <div class="grid">
-            <img src="photo1.jpg"><img src="photo2.jpg"><img src="photo3.jpg">
-            <img src="photo4.jpg"><img src="photo5.jpg"><img src="photo6.jpg">
-            <img src="photo7.jpg"><img src="photo8.jpg">
-            <div style="background:var(--red); color:white; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem; border:3px solid white;">F+S</div>
+            <img src="IMG-20260214-WA0058.jpg" loading="lazy"><img src="IMG-20260214-WA0062.jpg" loading="lazy"><img src="IMG-20260214-WA0065.jpg" loading="lazy">
+            <img src="IMG-20260214-WA0066.jpg" loading="lazy"><img src="IMG-20260214-WA0067.jpg" loading="lazy"><img src="IMG-20260214-WA0068.jpg" loading="lazy">
+            <img src="IMG-20260214-WA0070.jpg" loading="lazy"><img src="IMG-20260214-WA0071.jpg" loading="lazy">
+            <div style="background:var(--red); color:white; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem; border:3px solid white;">Always Forever</div>
         </div>
         <div id="music-container" style="position:absolute; top:-1000px"></div>
     </div>
 
     <script>
-        // Floating Background Hearts
         setInterval(() => {
             const heart = document.createElement('div');
             heart.innerHTML = '❤️'; heart.className = 'bg-heart';
@@ -177,7 +177,6 @@
             }
         }
 
-        // P1: No Button Teleport + Shrink
         let noScale = 1;
         const noBtn = document.getElementById('no-btn');
         noBtn.addEventListener('mouseover', () => {
@@ -188,7 +187,6 @@
             noBtn.style.top = Math.random() * 70 + '%';
         });
 
-        // P2: Choco Logic
         let collected = 0;
         function spawnChoco() {
             if(collected >= 5) { confetti(); setTimeout(()=>nextPage(3), 500); return; }
@@ -200,7 +198,6 @@
             arena.appendChild(c);
         }
 
-        // P3: Quiz
         function checkQ(step, ans) {
             if(step === 1 && ans === 'black') {
                 document.getElementById('q-text').innerText = "What is Sagar's Favorite Number?";
@@ -209,29 +206,20 @@
             else { alert("Wrong! Sagar is disappointed 😜"); }
         }
 
-        // P4: Slider
         function updateSlider(v) {
             document.getElementById('slider-val').innerText = v + "%";
             if(v == 100) setTimeout(() => nextPage(5), 500);
         }
 
-        // P5: Pass
         function checkPass() {
             if(document.getElementById('pass-field').value.toLowerCase().trim() === 'fatima') nextPage(6);
             else alert("Hint: She is Sagar's World!");
         }
 
-        // P6: Maze
         const mazeData = [
-            [0,0,1,0,0,0,0,1,0,0],
-            [1,0,1,0,1,1,0,1,1,0],
-            [0,0,0,0,1,0,0,0,0,0],
-            [0,1,1,0,1,1,1,1,1,0],
-            [0,0,0,0,0,0,0,0,1,0],
-            [1,1,1,1,1,1,0,1,1,0],
-            [0,0,0,0,0,1,0,0,0,0],
-            [0,1,1,1,0,1,1,1,1,0],
-            [0,1,0,0,0,0,0,0,0,0],
+            [0,0,1,0,0,0,0,1,0,0], [1,0,1,0,1,1,0,1,1,0], [0,0,0,0,1,0,0,0,0,0],
+            [0,1,1,0,1,1,1,1,1,0], [0,0,0,0,0,0,0,0,1,0], [1,1,1,1,1,1,0,1,1,0],
+            [0,0,0,0,0,1,0,0,0,0], [0,1,1,1,0,1,1,1,1,0], [0,1,0,0,0,0,0,0,0,0],
             [0,0,0,1,1,1,1,1,1,2] 
         ];
         let px = 0, py = 0;
@@ -245,7 +233,7 @@
                     if(x === px && y === py) {
                         const player = document.createElement('div');
                         player.className = 'player';
-                        player.style.backgroundImage = "url('wife.jpg')"; // Put her photo here
+                        player.style.backgroundImage = "url('wife.jpg')";
                         cell.appendChild(player);
                     }
                     if(mazeData[y][x] === 2) cell.innerHTML = '❤️';
