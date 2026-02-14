@@ -21,6 +21,7 @@
             color: var(--dark-pink);
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; text-align: center; overflow: hidden;
+            touch-action: manipulation;
         }
 
         .bg-heart {
@@ -39,50 +40,61 @@
             border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1);
             animation: fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative; border: 2px solid white;
-            max-height: 90vh; overflow-y: auto; /* Added for mobile safety */
+            max-height: 95vh; overflow-y: auto;
         }
 
         .active { display: block; }
 
-        .btn { 
-            padding: 12px 25px; border-radius: 50px; border: none; 
-            background: var(--red); color: white; font-weight: bold; 
-            cursor: pointer; margin: 10px; box-shadow: 0 4px 15px rgba(255, 75, 43, 0.3);
-            transition: all 0.3s ease;
+        /* YES/NO Button Layout Fix */
+        .btn-container {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 15px; margin-top: 20px; min-height: 200px; position: relative;
         }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255, 75, 43, 0.4); }
+
+        .btn { 
+            padding: 12px 35px; border-radius: 50px; border: none; 
+            background: var(--red); color: white; font-weight: bold; 
+            cursor: pointer; box-shadow: 0 4px 15px rgba(255, 75, 43, 0.3);
+            transition: all 0.3s ease; font-size: 1.1rem;
+        }
+        
         .heartbeat { animation: beat 1.5s infinite; }
-        @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
-        #no-btn { position: absolute; background: #eee; color: #666; transition: 0.2s cubic-bezier(0.19, 1, 0.22, 1); }
+        #no-btn { 
+            position: static; /* Starts in flow */
+            background: #eee; color: #666; 
+            transition: 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 100;
+        }
 
+        /* Maze Styles */
         #maze-container {
             display: grid; grid-template-columns: repeat(10, 1fr);
             width: 300px; height: 300px; margin: 0 auto;
             border: 8px solid white; border-radius: 20px; 
-            background: #a2d149;
-            overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+            background: #a2d149; overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+            touch-action: none; /* Prevents scrolling while dragging */
+            position: relative;
         }
         .cell { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
-        .wall { background-color: var(--maze-wall); border-radius: 4px; box-shadow: inset 0 0 5px rgba(0,0,0,0.3); }
+        .wall { background-color: var(--maze-wall); border-radius: 4px; }
         
         .player { 
             background-size: cover; background-position: center;
             border-radius: 50%; width: 26px; height: 26px;
             border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 10;
+            z-index: 10; cursor: grab;
         }
+        .player:active { cursor: grabbing; }
 
-        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 160px; margin: 20px auto 0; }
-        .ctrl-btn { background: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; color: var(--dark-pink); }
-
-        /* PHOTO QUALITY OPTIMIZATION */
+        /* Photos Grid */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
         .grid img { 
             width: 100%; aspect-ratio: 1; object-fit: cover; 
             border-radius: 12px; border: 3px solid white;
-            image-rendering: -webkit-optimize-contrast; /* Keeps them sharp but helps rendering speed */
-            will-change: transform; /* Helps mobile browsers handle high-res images */
+            image-rendering: auto;
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
@@ -96,7 +108,7 @@
     <div id="page1" class="page active">
         <h1>Will you be my Valentine? ❤️</h1>
         <p>Choose wisely, Fatima...</p>
-        <div style="height: 150px; position: relative; display: flex; justify-content: center; align-items: center;">
+        <div class="btn-container">
             <button class="btn heartbeat" onclick="nextPage(2)">YES! 😍</button>
             <button id="no-btn" class="btn">No</button>
         </div>
@@ -106,21 +118,20 @@
         <h1>Catch the Sweets! 🍫</h1>
         <p>Tap 5 chocolates for Sagar</p>
         <h3 id="choco-count">Collected: 0/5</h3>
-        <div id="choco-arena" style="height:200px; position:relative; background:rgba(255,255,255,0.3); border-radius:20px;"></div>
+        <div id="choco-arena" style="height:220px; position:relative; background:rgba(255,255,255,0.3); border-radius:20px;"></div>
     </div>
 
     <div id="page3" class="page">
         <h2 id="q-text">What is Sagar's Favorite Colour?</h2>
         <div id="options">
-            <button class="btn" onclick="checkQ(1, 'black')">Black 🖤</button>
-            <button class="btn" onclick="checkQ(1, 'white')">White 🤍</button>
-            <button class="btn" onclick="checkQ(1, 'red')">Red ❤️</button>
+            <button class="btn" style="margin:5px" onclick="checkQ(1, 'black')">Black 🖤</button>
+            <button class="btn" style="margin:5px" onclick="checkQ(1, 'white')">White 🤍</button>
+            <button class="btn" style="margin:5px" onclick="checkQ(1, 'red')">Red ❤️</button>
         </div>
     </div>
 
     <div id="page4" class="page">
         <h1>How much do you love me?</h1>
-        <p>Slide to the max!</p>
         <input type="range" min="0" max="100" value="0" oninput="updateSlider(this.value)">
         <h2 id="slider-val" style="font-size: 3rem;">0%</h2>
     </div>
@@ -133,29 +144,31 @@
     </div>
 
     <div id="page6" class="page">
-        <h2 style="margin-top:0">Navigate to My Heart! 🧭</h2>
+        <h2 style="margin:0">Drag me to the Heart! 🧭</h2>
+        <p style="font-size: 0.8rem;">Hold and slide the circle</p>
         <div id="maze-container"></div>
-        <div class="controls">
-            <div></div><button class="ctrl-btn" onclick="move(0,-1)">UP</button><div></div>
-            <button class="ctrl-btn" onclick="move(-1,0)">LFT</button>
-            <button class="ctrl-btn" onclick="move(0,1)">DWN</button>
-            <button class="ctrl-btn" onclick="move(1,0)">RGT</button>
-        </div>
+        <p id="maze-msg" style="height: 20px; color: var(--red); font-weight: bold;"></p>
     </div>
 
     <div id="final" class="page">
-        <h1 style="margin-bottom:0">I Love You, Fatima! 💖</h1>
+        <h1 style="margin:0">I Love You, Fatima! 💖</h1>
         <p>Forever & Always Yours - Sagar</p>
         <div class="grid">
-            <img src="IMG-20260214-WA0058.jpg" loading="lazy"><img src="IMG-20260214-WA0062.jpg" loading="lazy"><img src="IMG-20260214-WA0065.jpg" loading="lazy">
-            <img src="IMG-20260214-WA0066.jpg" loading="lazy"><img src="IMG-20260214-WA0067.jpg" loading="lazy"><img src="IMG-20260214-WA0068.jpg" loading="lazy">
-            <img src="IMG-20260214-WA0070.jpg" loading="lazy"><img src="IMG-20260214-WA0071.jpg" loading="lazy">
-            <div style="background:var(--red); color:white; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem; border:3px solid white;">Always Forever</div>
+            <img src="IMG-20260214-WA0058.jpg" loading="lazy">
+            <img src="IMG-20260214-WA0062.jpg" loading="lazy">
+            <img src="IMG-20260214-WA0065.jpg" loading="lazy">
+            <img src="IMG-20260214-WA0066.jpg" loading="lazy">
+            <img src="IMG-20260214-WA0067.jpg" loading="lazy">
+            <img src="IMG-20260214-WA0068.jpg" loading="lazy">
+            <img src="IMG-20260214-WA0070.jpg" loading="lazy">
+            <img src="IMG-20260214-WA0071.jpg" loading="lazy">
+            <div style="background:var(--red); color:white; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:0.9rem; border:3px solid white; aspect-ratio:1;">Always Forever</div>
         </div>
         <div id="music-container" style="position:absolute; top:-1000px"></div>
     </div>
 
     <script>
+        // BG Animation
         setInterval(() => {
             const heart = document.createElement('div');
             heart.innerHTML = '❤️'; heart.className = 'bg-heart';
@@ -167,7 +180,8 @@
 
         function nextPage(num) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(num === 'final' ? 'final' : 'page' + num).classList.add('active');
+            const next = document.getElementById(num === 'final' ? 'final' : 'page' + num);
+            next.classList.add('active');
             if(num === 2) spawnChoco();
             if(num === 6) initMaze();
             if(num === 'final') {
@@ -177,45 +191,54 @@
             }
         }
 
+        // P1: Smart No Button
         let noScale = 1;
         const noBtn = document.getElementById('no-btn');
-        noBtn.addEventListener('mouseover', () => {
+        const moveNo = () => {
+            noBtn.style.position = 'absolute';
             if(noScale < 0.2) { noBtn.style.display = 'none'; return; }
-            noScale -= 0.15;
+            noScale -= 0.1;
             noBtn.style.transform = `scale(${noScale})`;
-            noBtn.style.left = Math.random() * 70 + '%';
-            noBtn.style.top = Math.random() * 70 + '%';
-        });
+            noBtn.style.left = Math.random() * 80 + '%';
+            noBtn.style.top = Math.random() * 80 + '%';
+        };
+        noBtn.addEventListener('mouseover', moveNo);
+        noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveNo(); });
 
+        // P2: Choco
         let collected = 0;
         function spawnChoco() {
             if(collected >= 5) { confetti(); setTimeout(()=>nextPage(3), 500); return; }
             const arena = document.getElementById('choco-arena');
             const c = document.createElement('div');
-            c.innerHTML = '🍫'; c.style.position = 'absolute'; c.style.cursor = 'pointer'; c.style.fontSize = '30px';
+            c.innerHTML = '🍫'; c.style.position = 'absolute'; c.style.cursor = 'pointer'; c.style.fontSize = '35px';
             c.style.left = Math.random() * 80 + '%'; c.style.top = Math.random() * 80 + '%';
             c.onclick = () => { collected++; document.getElementById('choco-count').innerText = `Collected: ${collected}/5`; c.remove(); spawnChoco(); };
             arena.appendChild(c);
         }
 
+        // P3: Quiz
         function checkQ(step, ans) {
             if(step === 1 && ans === 'black') {
                 document.getElementById('q-text').innerText = "What is Sagar's Favorite Number?";
-                document.getElementById('options').innerHTML = `<button class="btn" onclick="checkQ(2, 4)">4</button><button class="btn" onclick="checkQ(2, 7)">7</button><button class="btn" onclick="checkQ(2, 13)">13</button>`;
+                document.getElementById('options').innerHTML = `<button class="btn" onclick="checkQ(2, 4)">4</button> <button class="btn" onclick="checkQ(2, 7)">7</button> <button class="btn" onclick="checkQ(2, 13)">13</button>`;
             } else if(step === 2 && ans === 7) { nextPage(4); }
-            else { alert("Wrong! Sagar is disappointed 😜"); }
+            else { alert("Incorrect! Try again ❤️"); }
         }
 
+        // P4: Slider
         function updateSlider(v) {
             document.getElementById('slider-val').innerText = v + "%";
             if(v == 100) setTimeout(() => nextPage(5), 500);
         }
 
+        // P5: Password
         function checkPass() {
             if(document.getElementById('pass-field').value.toLowerCase().trim() === 'fatima') nextPage(6);
             else alert("Hint: She is Sagar's World!");
         }
 
+        // P6: DRAG MAZE LOGIC
         const mazeData = [
             [0,0,1,0,0,0,0,1,0,0], [1,0,1,0,1,1,0,1,1,0], [0,0,0,0,1,0,0,0,0,0],
             [0,1,1,0,1,1,1,1,1,0], [0,0,0,0,0,0,0,0,1,0], [1,1,1,1,1,1,0,1,1,0],
@@ -223,6 +246,8 @@
             [0,0,0,1,1,1,1,1,1,2] 
         ];
         let px = 0, py = 0;
+        let isDragging = false;
+
         function initMaze() {
             const container = document.getElementById('maze-container');
             container.innerHTML = '';
@@ -230,9 +255,11 @@
                 for(let x=0; x<10; x++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell ' + (mazeData[y][x] === 1 ? 'wall' : '');
+                    cell.dataset.x = x; cell.dataset.y = y;
                     if(x === px && y === py) {
                         const player = document.createElement('div');
                         player.className = 'player';
+                        player.id = 'maze-player';
                         player.style.backgroundImage = "url('wife.jpg')";
                         cell.appendChild(player);
                     }
@@ -240,14 +267,47 @@
                     container.appendChild(cell);
                 }
             }
+            setupDrag();
         }
 
-        function move(dx, dy) {
-            let nx = px + dx, ny = py + dy;
-            if(ny >= 0 && ny < 10 && nx >= 0 && nx < 10 && mazeData[ny][nx] !== 1) {
-                px = nx; py = ny; initMaze();
-                if(mazeData[ny][nx] === 2) { confetti(); setTimeout(() => nextPage('final'), 500); }
-            }
+        function setupDrag() {
+            const container = document.getElementById('maze-container');
+            const handleMove = (e) => {
+                if(!isDragging) return;
+                const touch = e.touches ? e.touches[0] : e;
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                const cell = target ? target.closest('.cell') : null;
+                
+                if(cell) {
+                    const nx = parseInt(cell.dataset.x);
+                    const ny = parseInt(cell.dataset.y);
+                    
+                    // Check if adjacent and not a wall
+                    const dx = Math.abs(nx - px);
+                    const dy = Math.abs(ny - py);
+                    
+                    if((dx + dy <= 1) && mazeData[ny][nx] !== 1) {
+                        px = nx; py = ny;
+                        const player = document.getElementById('maze-player');
+                        cell.appendChild(player);
+                        document.getElementById('maze-msg').innerText = "";
+                        if(mazeData[ny][nx] === 2) {
+                            isDragging = false;
+                            confetti(); setTimeout(() => nextPage('final'), 600);
+                        }
+                    } else if (mazeData[ny][nx] === 1) {
+                        document.getElementById('maze-msg').innerText = "Ouch! Wall!";
+                    }
+                }
+            };
+
+            container.addEventListener('mousedown', () => isDragging = true);
+            window.addEventListener('mouseup', () => isDragging = false);
+            container.addEventListener('mousemove', handleMove);
+
+            container.addEventListener('touchstart', (e) => { isDragging = true; handleMove(e); }, {passive: false});
+            container.addEventListener('touchend', () => isDragging = false);
+            container.addEventListener('touchmove', (e) => { e.preventDefault(); handleMove(e); }, {passive: false});
         }
     </script>
 </body>
